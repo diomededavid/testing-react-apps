@@ -25,15 +25,21 @@ test('counter increments and decrements when the buttons are clicked', () => {
 
   const root = createRoot(div)
   act(() => root.render(<Counter />))
-
   const [decrement, increment] = div.querySelectorAll('button')
 
   const message = div.firstChild.querySelector('div')
-
   expect(message.textContent).toBe('Current count: 0')
-  act(() => increment.click())
+
+  // Using Dispatch event
+  const incrementClickEvent = new MouseEvent('click', {
+    bubbles: true,
+    cancelable: true,
+    button: 0,
+  })
+  act(() => increment.dispatchEvent(incrementClickEvent))
   expect(message.textContent).toBe('Current count: 1')
-  act(() => decrement.click())
+
+  act(() => decrement.dispatchEvent(incrementClickEvent))
   expect(message.textContent).toBe('Current count: 0')
 })
 
