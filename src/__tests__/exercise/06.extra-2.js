@@ -2,15 +2,13 @@
 // http://localhost:3000/location
 
 import * as React from 'react'
+
 import {render, screen, act} from '@testing-library/react'
 import Location from '../../examples/location'
+import {useCurrentPosition} from 'react-use-geolocation'
 
 // 🐨 set window.navigator.geolocation to an object that has a getCurrentPosition mock function
-beforeAll(() => {
-  window.navigator.geolocation = {
-    getCurrentPosition: jest.fn(),
-  }
-})
+jest.mock('react-use-geolocation')
 
 // 💰 I'm going to give you this handy utility function
 // it allows you to create a promise that you can resolve/reject on demand.
@@ -29,28 +27,27 @@ function deferred() {
 // // // assert on the resolved state
 // screen.debug()
 
-test('displays the users current location', async () => {
+test('displays the users current location', () => {
   const fakePosition = {
     coords: {
       latitude: 35,
       longitude: 139,
     },
   }
-  const {promise, resolve} = deferred()
 
-  window.navigator.geolocation.getCurrentPosition.mockImplementation(
-    callback => {
-      promise.then(() => callback(fakePosition))
-    },
-  )
+  let setReturnValue
+  function useMockCurrentPosition() {
+    const state = React.useState([])
+    setReturnValue = state[1]
+    return state[0]
+  }
+  useCurrentPosition.mockImplementation(useMockCurrentPosition)
 
   render(<Location />)
-
   expect(screen.getByLabelText(/loading/i)).toBeInTheDocument()
 
-  await act(async () => {
-    resolve()
-    await promise
+  act(() => {
+    setReturnValue([fakePosition])
   })
 
   expect(screen.queryByLabelText(/loading/i)).not.toBeInTheDocument()

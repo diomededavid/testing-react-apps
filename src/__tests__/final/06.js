@@ -28,6 +28,7 @@ test('displays the users current location', async () => {
     },
   }
   const {promise, resolve} = deferred()
+
   window.navigator.geolocation.getCurrentPosition.mockImplementation(
     callback => {
       promise.then(() => callback(fakePosition))
